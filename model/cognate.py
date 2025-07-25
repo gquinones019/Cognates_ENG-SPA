@@ -73,13 +73,11 @@ def lookup_cognate(surface_form: str, lang: Language) -> Result:
     if not entries:
         return Result(Word(surface_form, None), None, ResultType.NO_MATCH, "Word not found in database.")
 
-    # Find the entry that matches the input language
     input_entry = next((e for e in entries if e.lang == lang), None)
 
     if not input_entry:
         return Result(Word(surface_form, None), None, ResultType.NO_MATCH, "No entry for input language.")
 
-    # Look for a potential cognate in the other language with same origin + pos
     other_lang = Language.SPANISH if lang == Language.ENGLISH else Language.ENGLISH
 
     for candidate in entries:
