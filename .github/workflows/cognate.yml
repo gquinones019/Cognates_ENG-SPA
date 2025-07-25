@@ -21,4 +21,4 @@ jobs:
           docker build . --file Dockerfile --tag ${ORG}/${IMAGE_NAME}:${TAG}
       - name: Run the tests
         run: |
-          docker run -i ${ORG}/${IMAGE_NAME}:${TAG} python -m pytest test
+          docker run -i ${ORG}/${IMAGE_NAME}:${TAG} python -m pytest tests
