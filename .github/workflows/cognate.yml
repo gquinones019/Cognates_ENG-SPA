@@ -1,4 +1,4 @@
-name:  Cognate Check
+name: Cognate Check
 
 on:
   push:
@@ -8,17 +8,20 @@ on:
 
 jobs:
   test:
-    env:
-      ORG: "uazhlt"
-      IMAGE_NAME: "cognates_week-3"
-      TAG: "latest"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build the docker image
+
+      - name: Set up Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait for MySQL to be ready
         run: |
-          docker build . --file Dockerfile --tag ${ORG}/${IMAGE_NAME}:${TAG}
-      - name: Run the tests
-        run: |
-          docker run -i ${ORG}/${IMAGE_NAME}:${TAG} python -m pytest tests
+          until docker compose exec db mysqladmin ping -h "db" --silent; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+
+      - name: Run tests
+        run: docker compose exec app python -m pytest tests
