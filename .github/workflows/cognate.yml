@@ -10,13 +10,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Set up Docker Compose
+      - name: Start containers
         run: docker compose up -d --build
 
-      - name: Wait for MySQL to be ready
+      - name: List containers
+        run: docker compose ps
+
+      - name: Show app logs
+        run: docker compose logs app
+
+      - name: Wait for db ready
         run: |
           until docker compose exec db mysqladmin ping -h "db" --silent; do
             echo "Waiting for database..."
