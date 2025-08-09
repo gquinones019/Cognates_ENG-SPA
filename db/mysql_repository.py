@@ -8,7 +8,7 @@ class MysqlRepository(Repository):
         config = {
             'user': 'root',
             'password': 'root',
-            'host': 'localhost',
+            'host': 'db',
             'port': 3306,
             'database': 'cognates_db',
         }
