@@ -9,8 +9,8 @@ class MysqlRepository(Repository):
             'user': 'root',
             'password': 'root',
             'host': 'localhost',
-            'port': 32000,
-            'database': 'cognates_db'
+            'port': 3306,
+            'database': 'cognates_db',
         }
         self.connection = None
         self.cursor = None
@@ -28,33 +28,22 @@ class MysqlRepository(Repository):
 
     def __del__(self):
             # Add checks to ensure connection and cursor exist before trying to close them
-        if self.cursor:  # Check if cursor object exists (i.e., not None)
-            self.cursor.close()
-                # print("MySQL cursor closed.") # Optional: for debugging
-        if self.connection and self.connection.is_connected():  # Check if connection exists AND is still open
-            self.connection.close()
-                # print("MySQL connection closed.") # Optional: for debugging
-        else:
-                # This 'else' block will catch cases where connection was never established or already closed
-                # print("No active MySQL connection or cursor to close.") # Optional: for debugging
-            pass  # Or just do nothing, which is fine
-
-
-        """
-    def __del__(self):
-        try:
-            if hasattr(self, 'cursor') and self.cursor:
-                self.cursor.close()
-            if hasattr(self, 'connection') and self.connection:
-                self.connection.close()
-        except Exception:
-            pass
-        """
+            try:
+                if self.cursor:
+                    self.cursor.close()
+            except Exception:
+                pass
+            try:
+                if self.connection and self.connection.is_connected():
+                    self.connection.close()
+            except Exception:
+                pass
 
     def map_pos(self, entry: dict) -> PartOfSpeech:
         pos_switcher = {'adjective': PartOfSpeech.ADJECTIVE,
                         'adverb': PartOfSpeech.ADVERB,
                         'noun': PartOfSpeech.NOUN,
+                        'preposition': PartOfSpeech.PREPOSITION,
                         'verb': PartOfSpeech.VERB}
         pos = pos_switcher.get(entry.get('pos'), None)
         return pos
@@ -68,6 +57,8 @@ class MysqlRepository(Repository):
                                 'latin': WordOrigin.LATIN,
                                 'mande': WordOrigin.MANDE,
                                 'nahuatl': WordOrigin.NAHUATL,
+                                'proto germanic': WordOrigin.PROTO_GERMANIC,
+                                'proto indo european': WordOrigin.PROTO_INDO_EUROPEAN,
                                 'sinhalese': WordOrigin.SINHALESE}
         word_origin = word_origin_switcher.get(entry.get('word_origin'), None)
         return word_origin
@@ -100,11 +91,30 @@ class MysqlRepository(Repository):
         lexicon = [self.mapper(entry) for entry in entries]
         return lexicon
 
-    """
-    def lexical(self) -> LexicalEntry:
-        lexicon = self.load_lexicon()
-        if lexicon:
-            return lexicon[0]
-        else:
-            raise ValueError("No lexical entries found in the database.")
-    """
+    def load_false_friends(self) -> list[LexicalEntry]:
+        sql = 'SELECT * FROM false_friends'
+        self.cursor.execute(sql)
+        entries = [{'id': id,
+                    'word': word,
+                    'pos': pos,
+                    'definition': definition,
+                    'word_origin': word_origin,
+                    'language': lang
+                    } for (id, word, pos, definition, word_origin, lang) in self.cursor]
+        return entries
+
+    def get(self, word: str) -> list[LexicalEntry]:
+        sql = "SELECT * FROM lexicon WHERE word = %s"
+        self.cursor.execute(sql, (word,))
+        entries = [{'id': id,
+                    'word': word,
+                    'pos': pos,
+                    'definition': definition,
+                    'word_origin': word_origin,
+                    'language': lang
+                    } for (id, word, pos, definition, word_origin, lang) in self.cursor]
+        lexicon = [self.mapper(entry) for entry in entries]
+        return lexicon
+
+
+

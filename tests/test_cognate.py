@@ -1,44 +1,73 @@
 from model.cognate import *
 
-lexical_database = {
-    "animal": [
-        LexicalEntry('animal', PartOfSpeech.NOUN, "any living creature, including humans", WordOrigin.LATIN, Language.ENGLISH),
-        LexicalEntry('animal', PartOfSpeech.NOUN, "Ser orgánico que vive, siente y se mueve por propio impulso", WordOrigin.LATIN, Language.SPANISH)
-    ],
-    "flexible": [
-        LexicalEntry('flexible', PartOfSpeech.ADJECTIVE,"to bend", WordOrigin.LATIN, Language.ENGLISH),
-        LexicalEntry('flexible', PartOfSpeech.ADJECTIVE, "Que tiene disposición para doblarse fácilmente", WordOrigin.LATIN, Language.SPANISH)
+def test_enum_values():
+    assert PartOfSpeech.NOUN.value == "Noun"
+    assert WordOrigin.LATIN.value == "Latin"
+    assert Language.ENGLISH.value == "English"
+    assert ResultType.COGNATE.value == "Cognate"
 
-    ]
-}
 
-def lookup_cognate(surface_form: str, lang: Language) -> Result:
-    entries = lexical_database.get(surface_form.lower())
+def test_create_lexical_entry():
+    entry = LexicalEntry(
+        word="libro",
+        pos=PartOfSpeech.NOUN,
+        definition="book",
+        word_origin=WordOrigin.LATIN,
+        lang=Language.SPANISH
+    )
+    assert entry.word == "libro"
+    assert entry.pos == PartOfSpeech.NOUN
+    assert entry.definition == "book"
+    assert entry.word_origin == WordOrigin.LATIN
+    assert entry.lang == Language.SPANISH
 
-    if not entries:
-        return Result(Word(surface_form, None), None, ResultType.NO_MATCH, "Word not found in database.")
 
-    input_entry = next((e for e in entries if e.lang == lang), None)
+def test_create_word_with_lexical_entry():
+    entry = LexicalEntry(
+        word="libro",
+        pos=PartOfSpeech.NOUN,
+        definition="book",
+        word_origin=WordOrigin.LATIN,
+        lang=Language.SPANISH
+    )
+    word = Word(surface_form="libro", lex_entry=entry)
+    assert word.surface_form == "libro"
+    assert word.lex_entry is entry
 
-    if not input_entry:
-        return Result(Word(surface_form, None), None, ResultType.NO_MATCH, "No entry for input language.")
 
-    other_lang = Language.SPANISH if lang == Language.ENGLISH else Language.ENGLISH
-
-    for candidate in entries:
-        if candidate.lang == other_lang and candidate.word_origin == input_entry.word_origin and candidate.pos == input_entry.pos:
-            input_word = Word(surface_form, input_entry)
-            return Result(input_word, candidate, ResultType.COGNATE, "Cognate found.")
-
-    input_word = Word(surface_form, input_entry)
-    return Result(input_word, None, ResultType.NO_MATCH, "No cognate found.")
-
-def test_is_cognate():
-    result = lookup_cognate("animal", Language.SPANISH)
+def test_result_with_matched_entry():
+    entry = LexicalEntry(
+        word="book",
+        pos=PartOfSpeech.NOUN,
+        definition="A set of written pages",
+        word_origin=WordOrigin.PROTO_GERMANIC,
+        lang=Language.ENGLISH
+    )
+    word = Word(surface_form="book", lex_entry=entry)
+    result = Result(
+        input_word=word,
+        matched_entry=entry,
+        result_type=ResultType.COGNATE,
+        note="Common Latin root"
+    )
+    assert result.input_word is word
+    assert result.matched_entry is entry
     assert result.result_type == ResultType.COGNATE
-    print(result.note)
+    assert result.note == "Common Latin root"
 
-def test_not_cognate():
-    result = lookup_cognate("doll", Language.ENGLISH)
+def test_result_without_matched_entry():
+    entry = LexicalEntry(
+        word="mesa",
+        pos=PartOfSpeech.NOUN,
+        definition="table",
+        word_origin=WordOrigin.LATIN,
+        lang=Language.SPANISH
+    )
+    word = Word(surface_form="mesa", lex_entry=entry)
+    result = Result(
+        input_word=word,
+        matched_entry=None,
+        result_type=ResultType.NO_MATCH
+    )
+    assert result.matched_entry is None
     assert result.result_type == ResultType.NO_MATCH
-    print("No match", result.note)

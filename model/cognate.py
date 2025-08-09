@@ -5,6 +5,7 @@ class PartOfSpeech(Enum):
     ADJECTIVE = "Adjective"
     ADVERB = "Adverb"
     NOUN = "Noun"
+    PREPOSITION = "Preposition"
     VERB = "Verb"
 
 class WordOrigin(Enum):
@@ -16,6 +17,8 @@ class WordOrigin(Enum):
     LATIN = "Latin"
     MANDE = "Mande"
     NAHUATL = "Nahuatl"
+    PROTO_GERMANIC = "Proto Germanic"
+    PROTO_INDO_EUROPEAN = "Proto Indo European"
     SINHALESE = "Sinhalese"
 
 class Language(Enum):
@@ -25,6 +28,7 @@ class Language(Enum):
 class ResultType(Enum):
     COGNATE = "Cognate"
     NO_MATCH = "No Match"
+    FALSE_FRIEND = "False Friend"
 
 class LexicalEntry:
     def __init__(self,

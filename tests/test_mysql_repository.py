@@ -46,3 +46,7 @@ def test_mapper_spa():
     assert spa.word_origin == WordOrigin.LATIN
     assert spa.lang == Language.SPANISH
 
+def test_load_lexicon():
+    lexicon = repo.load_lexicon()
+    assert len(lexicon) >= 46
+
