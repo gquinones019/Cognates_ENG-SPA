@@ -1,13 +1,9 @@
-version: "3.8"
 services:
   app:
     build: .
-    links:
-      - db
-
     depends_on:
       - db
-
+    command: tail -f /dev/null
   db:
     image: mysql:9.4.0
     ports:
