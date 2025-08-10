@@ -7,8 +7,10 @@ class Services:
     def __init__(self):
         self.repo = db.mysql_repository.MysqlRepository()
 
+# This checks if inputted word is in the "false friends" databadse, meaning if it's a false cognate or not.
+
     def lookup_cognate(self, surface_form: str, lang: Language) -> Result:
-        entries = self.repo.get(surface_form.lower())  # Looks in lexicon table
+        entries = self.repo.get(surface_form.lower())
 
         if not entries:
             # Check if this specific word is in false_friends
@@ -31,7 +33,7 @@ class Services:
                     "This is not a cognate."
                 )
 
-        # Word exists in lexicon
+        # Word exists in lexicon, if the word is in the lexicon table, it returns the message "Cognate Found".
         input_entry = next((e for e in entries if e.lang == lang), None)
 
         if not input_entry:
