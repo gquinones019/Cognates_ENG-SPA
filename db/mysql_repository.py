@@ -1,3 +1,4 @@
+import os
 from db.repository import *
 import mysql.connector
 
@@ -5,24 +6,23 @@ import mysql.connector
 class MysqlRepository(Repository):
     def __init__(self):
         super().__init__()
-        """
-        config = {
-            'user': 'root',
-            'password': 'root',
-            'host': 'localhost',
-            'port': 32000,
-            'database': 'cognates_db',
-        }
-        """
 
-        config = {
-            'user': 'root',
-            'password': 'root',
-            'host': 'db',
-            'port': 3306,
-            'database': 'cognates_db',
-        }
-
+        if os.environ.get('APP_ENV') == 'docker':
+            config = {
+                'user': 'root',
+                'password': 'root',
+                'host': 'db',
+                'port': 3306,
+                'database': 'cognates_db',
+            }
+        else:
+            config = {
+                'user': 'root',
+                'password': 'root',
+                'host': 'localhost',
+                'port': 3306,
+                'database': 'cognates_db',
+            }
         self.connection = None
         self.cursor = None
 

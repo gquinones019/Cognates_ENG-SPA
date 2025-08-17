@@ -1,14 +1,25 @@
+version: "3.9"
 services:
   app:
     build: .
+    ports:
+      - "5050:5000"
     depends_on:
-      - db
-    command: tail -f /dev/null
+      db:
+        condition: service_healthy
+    environment:
+      - APP_ENV=docker
+
   db:
     image: mysql:9.4.0
     ports:
-      - "32000:3306"
+      - "32000:3306"  # Expose MySQL to your Mac
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./data:/docker-entrypoint-initdb.d/:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
